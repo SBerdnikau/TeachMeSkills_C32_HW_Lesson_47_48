@@ -23,26 +23,26 @@ public class ProductService {
     }
 
     public Optional<Product> createProduct(Product product){
-        Optional<Long> productId = productRepository.createProduct(product);
-        if(productId.isPresent()){
-            return productRepository.getProductById(productId.get());
-        }
+//        Optional<Long> productId = productRepository.createProduct(product);
+//        if(productId.isPresent()){
+//            return productRepository.getProductById(productId.get());
+//        }
         return Optional.empty();
     }
 
     public Optional<Product> updateProduct(Product product){
-        Boolean result = productRepository.updateProduct(product);
-        if(result){
-            return getProductById(product.getId());
-        }
+//        Boolean result = productRepository.updateProduct(product);
+//        if(result){
+//            return getProductById(product.getId());
+//        }
         return Optional.empty();
     }
 
     public Optional<Product> deleteProduct(Long id){
-        Boolean result = productRepository.deleteProduct(id);
-        if(result){
-            return getProductById(id);
-        }
+//        Boolean result = productRepository.deleteProduct(id);
+//        if(result){
+//            return getProductById(id);
+//        }
         return Optional.empty();
     }
 

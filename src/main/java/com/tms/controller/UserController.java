@@ -42,15 +42,15 @@ public class UserController {
             @ApiResponse(description = "When something wrong.", responseCode = "409")
     })
     @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody User user)  {
-        logger.info("Received request to create user: {}", user);
-        Optional<User> createdUser = userService.createUser(user);
-        if (createdUser.isEmpty()) {
-            logger.error("Failed to create user: {}", user);
+    public ResponseEntity<HttpStatus> createUser(@RequestBody User user)  {
+        logger.info("Received request to create user: {}", user.getFirstname());
+        Boolean result = userService.createUser(user);
+        if (!result) {
+            logger.error("Failed to create user: {}", user.getFirstname());
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
-        logger.info("User created successfully: {}", createdUser.get());
-        return new ResponseEntity<>(createdUser.get(), HttpStatus.CREATED);
+        logger.info("User created successfully: {}", user.getFirstname());
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @ApiResponses(value = {
