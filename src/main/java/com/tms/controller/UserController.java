@@ -67,7 +67,7 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        logger.info("User with ID {} fetched successfully: {}", userId);
+        logger.info("User with ID {} fetched successfully", userId);
         return new ResponseEntity<>(user.get(), HttpStatus.OK);
     }
 
@@ -93,8 +93,8 @@ public class UserController {
     public ResponseEntity<HttpStatus> deleteUser(@PathVariable("id") @Parameter(name = "User id") Long userId) {
         logger.info("Received request to delete user with ID: {}", userId);
 
-        Optional<User> userDeleted = userService.deleteUser(userId);
-        if (userDeleted.isEmpty()) {
+        Boolean result = userService.deleteUser(userId);
+        if (!result) {
            logger.warn("Failed to delete user with ID: {}", userId);
            return new ResponseEntity<>(HttpStatus.CONFLICT);
         }

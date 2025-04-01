@@ -24,11 +24,20 @@ public class UserRepository {
     }
 
     public Optional<User> getUserById(Long id) {
-       return Optional.empty();
+       return Optional.of(entityManager.find(User.class, id));
     }
     
     public Boolean deleteUser(Long id){
-      return false;
+      try {
+          entityManager.getTransaction().begin();
+          entityManager.remove(entityManager.find(User.class, id));
+          entityManager.getTransaction().commit();
+      }catch(Exception e){
+          logger.error("Deleted is failed -> " + e.getMessage());
+          entityManager.getTransaction().rollback();
+          return false;
+      }
+      return true;
     }
     
     public Boolean createUser(User user){
@@ -44,8 +53,18 @@ public class UserRepository {
         return true;
     }
 
-    public Boolean updateUser(User userRequestDto) {
-       return false;
+    public Optional<User> updateUser(User userRequestDto) {
+        User userUpdated = null;
+        try {
+            entityManager.getTransaction().begin();
+            userUpdated = entityManager.merge(userRequestDto);
+            entityManager.getTransaction().commit();
+        }catch(Exception e){
+            logger.error("Exception update user -> " + e.getMessage());
+            entityManager.getTransaction().rollback();
+            return Optional.empty();
+        }
+       return Optional.of(userUpdated);
     }
 
     public List<User> getAllUsers() {

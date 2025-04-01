@@ -1,13 +1,31 @@
 package com.tms.repository;
 
+import com.tms.config.SQLQuery;
+import com.tms.model.User;
 import com.tms.model.dto.RegistrationRequestDto;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import java.sql.SQLException;
 
 @Repository
 public class SecurityRepository {
 
+    private final EntityManager entityManager;
+
+    @Autowired
+    public SecurityRepository(EntityManager entityManager) {
+        this.entityManager = entityManager;
+    }
+
     public Boolean registration(RegistrationRequestDto requestDto) throws SQLException {
+
+        //entityManager.createNativeQuery(SQLQuery.GET_SECURITY_BY_LOGIN); // черех простой SQL
+        TypedQuery<User> query =  entityManager.createNativeQuery("SELECT u FROM User u WHERE u.login = :login", User.class);
+        entityManager.setProperty("login", requestDto.getLogin());
+        query.getSingleResultOrNull();
+
 //        Connection connection = databaseService.getConnection();
 //
 //        try {
@@ -47,7 +65,7 @@ public class SecurityRepository {
     }
 
     public Boolean isLoginUsed(String login) {
-
+//
 //        try {
 //            PreparedStatement createUserStatement = connection.prepareStatement(SQLQuery.GET_SECURITY_BY_LOGIN);
 //            createUserStatement.setString(1, login);

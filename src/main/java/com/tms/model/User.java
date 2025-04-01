@@ -38,10 +38,10 @@ public class User {
     //insertable = false, updatable = false -> встравляем не состороны Java
     @Column(name = "created", insertable = false, updatable = false)
     private Timestamp created;
-    @Column(name = "updated", insertable = false, updatable = false)
+    @Column(name = "updated", insertable = false, updatable = true)
     private Timestamp updated;
 
-    @Column(name = "is_deleted")
+    @Column(name = "is_deleted", insertable = false)
     private Boolean isDeleted;
 
     @Transient //заглушка
