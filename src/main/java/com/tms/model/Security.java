@@ -32,7 +32,9 @@ public class Security {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @Column(name = "created", insertable = false, updatable = false)
     private Timestamp created;
+    @Column(name = "updated", insertable = false, updatable = true)
     private Timestamp updated;
 
     @Column(name = "user_id")

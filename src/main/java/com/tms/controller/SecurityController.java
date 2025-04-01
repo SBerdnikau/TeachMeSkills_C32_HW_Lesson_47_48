@@ -1,5 +1,6 @@
 package com.tms.controller;
 
+import com.tms.model.User;
 import com.tms.model.dto.RegistrationRequestDto;
 import com.tms.service.SecurityService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -15,6 +16,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.security.auth.login.LoginException;
+import java.util.Optional;
 
 
 @RestController
@@ -32,21 +36,22 @@ public class SecurityController {
 
     @Operation(summary = "User registration", description = "Endpoint allows to register a new user. Checks validation. In the database creates 2 new models related to each other (User, Security)")
     @PostMapping("/registration")
-    public ResponseEntity<HttpStatus> registration(@RequestBody @Valid RegistrationRequestDto requestDto,
-                                                   BindingResult bindingResult) {
+    public ResponseEntity<User> registration(@RequestBody @Valid RegistrationRequestDto requestDto,
+                                                   BindingResult bindingResult) throws LoginException {
         logger.info("Received registration request for user: {}", requestDto.getLogin());
         if (bindingResult.hasErrors()) {
             logger.warn("Validation errors occurred for user: {}", requestDto.getLogin());
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
+
         logger.info("User {} successfully registered", requestDto.getLogin());
-        Boolean result = securityService.registration(requestDto);
-        if (result) {
-            logger.info("User {} successfully registered", requestDto.getLogin());
-            return new ResponseEntity<>(HttpStatus.CREATED);
-        } else {
-            logger.error("Failed to register user: {}", requestDto.getLogin());
+        Optional<User> user = securityService.registration(requestDto);
+        if (user.isEmpty()) {
+            logger.info("Failed to register user: {}", requestDto.getLogin());
             return new ResponseEntity<>(HttpStatus.CONFLICT);
+        } else {
+            logger.error("User {} successfully registered", requestDto.getLogin());
+            return new ResponseEntity<>(user.get() ,HttpStatus.CREATED);
         }
     }
 }

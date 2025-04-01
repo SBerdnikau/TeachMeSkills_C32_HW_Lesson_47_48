@@ -1,84 +1,50 @@
 package com.tms.repository;
 
 import com.tms.config.SQLQuery;
+import com.tms.model.Security;
 import com.tms.model.User;
 import com.tms.model.dto.RegistrationRequestDto;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import java.sql.SQLException;
+import java.util.Optional;
 
 @Repository
 public class SecurityRepository {
 
     private final EntityManager entityManager;
+    private final Logger logger = LoggerFactory.getLogger(EntityManager.class);
 
     @Autowired
     public SecurityRepository(EntityManager entityManager) {
         this.entityManager = entityManager;
     }
 
-    public Boolean registration(RegistrationRequestDto requestDto) throws SQLException {
-
-        //entityManager.createNativeQuery(SQLQuery.GET_SECURITY_BY_LOGIN); // черех простой SQL
-        TypedQuery<User> query =  entityManager.createNativeQuery("SELECT u FROM User u WHERE u.login = :login", User.class);
-        entityManager.setProperty("login", requestDto.getLogin());
-        query.getSingleResultOrNull();
-
-//        Connection connection = databaseService.getConnection();
-//
-//        try {
-//            connection.setAutoCommit(false);
-//            PreparedStatement createUserStatement = connection.prepareStatement(SQLQuery.CREATE_USER, Statement.RETURN_GENERATED_KEYS);
-//            createUserStatement.setString(1, requestDto.getFirstname());
-//            createUserStatement.setString(2, requestDto.getSecondName());
-//            createUserStatement.setInt(3, requestDto.getAge());
-//            createUserStatement.setString(4, requestDto.getTelephoneNumber());
-//            createUserStatement.setString(5, requestDto.getEmail());
-//            createUserStatement.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
-//            createUserStatement.setString(7, requestDto.getSex());
-//            createUserStatement.setBoolean(8, false);
-//            createUserStatement.executeUpdate();
-//
-//            ResultSet generatedKeys = createUserStatement.getGeneratedKeys();
-//            long userId = -1;
-//            if (generatedKeys.next()) {
-//                userId = generatedKeys.getLong(1);
-//            }
-//
-//            PreparedStatement createSecurityStatement = connection.prepareStatement(SQLQuery.CREATE_SECURITY);
-//            createSecurityStatement.setString(1, requestDto.getLogin());
-//            createSecurityStatement.setString(2, requestDto.getPassword());
-//            createSecurityStatement.setString(3, Role.USER.toString());
-//            createSecurityStatement.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
-//            createSecurityStatement.setLong(5, userId);
-//            createSecurityStatement.executeUpdate();
-//
-//            connection.commit();
-//            return true;
-//        } catch (Exception e) {
-//            System.out.println(e.getMessage());
-//            connection.rollback();
-//        }
-        return false;
+    public Optional<User> registration(User user, Security security) throws SQLException {
+        try {
+            entityManager.getTransaction().begin();
+            entityManager.persist(user);
+            security.setUserId(user.getId());
+            entityManager.persist(security);
+            entityManager.getTransaction().commit();
+            return Optional.of(entityManager.find(User.class, user.getId()));
+        }catch (Exception e) {
+            logger.error("Registration is failed -> " + e.getMessage());
+            entityManager.getTransaction().rollback();
+            return Optional.empty();
+        }
     }
 
     public Boolean isLoginUsed(String login) {
-//
-//        try {
-//            PreparedStatement createUserStatement = connection.prepareStatement(SQLQuery.GET_SECURITY_BY_LOGIN);
-//            createUserStatement.setString(1, login);
-//            ResultSet resultSet = createUserStatement.executeQuery();
-//            while (resultSet.next()) {
-//                if( resultSet.getString("login").equals(login) ){
-//                    return true;
-//                }
-//            }
-//        } catch (Exception e) {
-//            System.out.println(e.getMessage());
-//        }
-        return false;
+        //entityManager.createNativeQuery(SQLQuery.GET_SECURITY_BY_LOGIN); // черех простой SQL
+        Query query =  entityManager.createQuery("SELECT s FROM security s WHERE s.login = :login");
+        entityManager.setProperty("login", login);
+        return query.getSingleResultOrNull() != null;
     }
 
 }
