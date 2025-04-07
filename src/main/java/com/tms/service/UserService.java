@@ -24,7 +24,6 @@ public class UserService {
     }
 
     public Optional<User> updateUser(User user){
-        user.setUpdated(new Timestamp(System.currentTimeMillis()));
         return userRepository.updateUser(user);
     }
 
@@ -38,10 +37,6 @@ public class UserService {
     }
 
     public List<User> getAllUsers(){
-        List<User> users = userRepository.getAllUsers();
-        if(users.isEmpty()){
-            return null;
-        }
-        return users;
+        return userRepository.getAllUsers();
     }
 }

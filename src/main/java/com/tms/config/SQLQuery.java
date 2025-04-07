@@ -12,6 +12,7 @@ public interface SQLQuery {
             "VALUES (DEFAULT, ?, ?, ?, DEFAULT, ?, ?)";
     String GET_SECURITY_BY_LOGIN = "SELECT * FROM security WHERE login = ?";
 
+    String ADD_PRODUCT_BY_USER = "INSERT INTO l_users_product (product_id, user_id) VALUES (?, ?)";
     String GET_PRODUCT_BY_ID = "SELECT * FROM product WHERE id = ?";
     String DELETE_PRODUCT = "DELETE FROM product WHERE id = ?";
     String CREATE_PRODUCT = "INSERT INTO product (id, name, price, created, updated) VALUES (DEFAULT, ?, ?, DEFAULT, ?)";

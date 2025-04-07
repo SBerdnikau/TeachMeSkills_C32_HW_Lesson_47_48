@@ -7,12 +7,12 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @OpenAPIDefinition(info = @Info(
-		title = "Market c32 app",
-		description = "Test app for lessons 45",
+		title = "Spring Boot JPA Market",
+		version = "1.0",
+		description = "This is a simple market application on Spring Boot with JPA API.  This API allows users to...",
 		contact = @Contact(
 				name = "Sergey Berdnikov",
-				email = "test@test.com",
-				url = "https://tmc.by"
+				email = "berdnikausiarhei@test.com"
 		)
 ))
 

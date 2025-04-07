@@ -38,79 +38,72 @@ public class ProductController {
         this.productService = productService;
     }
 
-    @ApiResponses(value = {
-            @ApiResponse(description = "Product created successfully", responseCode = "201"),
-            @ApiResponse(description = "Conflict during product creation", responseCode = "409")
-    })
     @PostMapping
-    public ResponseEntity<Product> createProduct(@RequestBody Product product)  {
+    public ResponseEntity<HttpStatus> createProduct(@RequestBody Product product)  {
         logger.info("Received request to create a product: {}", product);
-        Optional<Product> createdProduct = productService.createProduct(product);
-        if(createdProduct.isEmpty()){
+        Boolean result = productService.createProduct(product);
+        if(!result){
             logger.error("Failed to create product: {}", product);
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
-        logger.info("Product created successfully: {}", createdProduct.get());
-        return new ResponseEntity<>(createdProduct.get(), HttpStatus.CREATED);
+        logger.info("Product created successfully: {}", product.getName());
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    @ApiResponses(value = {
-            @ApiResponse(description = "Product fetched successfully", responseCode = "200"),
-            @ApiResponse(description = "Product not found", responseCode = "404")
-    })
     @GetMapping("/{id}")
-    public ResponseEntity<Product> getProductById(@PathVariable("id") Long productId){
-        logger.info("Received request to fetch product by ID: {}", productId);
-        Optional<Product> product = productService.getProductById(productId);
+    public ResponseEntity<Product> getProductById(@PathVariable("id") Long id){
+        logger.info("Received request to fetch product by ID: {}", id);
+        Optional<Product> product = productService.getProductById(id);
         if(product.isEmpty()){
-            logger.warn("Product with ID {} not found", productId);
+            logger.warn("Product with ID {} not found", id);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        logger.info("Product with ID {} fetched successfully: {}", productId, product.get());
+        logger.info("Product with ID {} fetched successfully: {}", id, product.get());
         return new ResponseEntity<>(product.get(), HttpStatus.OK);
     }
 
-    @ApiResponses(value = {
-            @ApiResponse(description = "Product updated successfully", responseCode = "200"),
-            @ApiResponse(description = "Conflict during product update", responseCode = "409")
-    })
-    @PutMapping("/id")
-    public ResponseEntity<Product> updateProduct(@PathVariable("id") Long productId, @RequestBody Product product) {
-        logger.info("Received request to update product with ID {}: {}", productId, product);
+
+    @PutMapping
+    public ResponseEntity<Product> updateProduct(@RequestBody Product product) {
+        logger.info("Received request to update product {}", product);
         Optional<Product> updatedProduct = productService.updateProduct(product);
-        logger.error("Failed to update product with ID {}: {}", productId, product);
+        logger.error("Failed to update product with ID {}: ", product);
         if(updatedProduct.isEmpty()){
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
-        logger.info("Product with ID {} updated successfully: {}", productId, updatedProduct.get());
+        logger.info("Product {} updated successfully ", updatedProduct.get());
         return new ResponseEntity<>(updatedProduct.get(), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<HttpStatus> deleteProduct(@PathVariable("id") @Parameter(description = "Product ID") Long productId)  {
-        logger.info("Received request to delete product with ID: {}", productId);
-        Optional<Product> deletedProduct = productService.deleteProduct(productId);
-        if(deletedProduct.isPresent()){
-            logger.warn("Product with ID {} not found for deletion", productId);
+    public ResponseEntity<HttpStatus> deleteProduct(@PathVariable("id")  Long id)  {
+        logger.info("Received request to delete product with ID: {}", id);
+        Boolean result = productService.deleteProduct(id);
+        if(!result){
+            logger.warn("Product with ID {} not found for deletion", id);
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
-        logger.info("Product with ID {} deleted successfully", productId);
+        logger.info("Product with ID {} deleted successfully", id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @ApiResponses(value = {
-            @ApiResponse(description = "All products fetched successfully", responseCode = "200")
-    })
-    @GetMapping("/all-products")
+    @GetMapping
     public ResponseEntity<List<Product>> getUserListPage(HttpServletResponse response){
         logger.info("Received request to fetch all products");
-
         List<Product> products = productService.getAllProducts();
         if (products.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-
         logger.info("All products fetched successfully. Total products: {}", products.size());
         return new ResponseEntity<>(products, HttpStatus.OK);
+    }
+
+    @PostMapping("/{userId}/{productId}")
+    public ResponseEntity<HttpStatus> addProductByUser(@PathVariable("userId") Long userId, @PathVariable("productId") Long productId) {
+        Boolean result = productService.addProductByUser(userId, productId);
+        if (!result) {
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 }

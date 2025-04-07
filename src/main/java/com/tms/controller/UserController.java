@@ -3,9 +3,6 @@ package com.tms.controller;
 import com.tms.model.User;
 import com.tms.service.UserService;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,10 +34,6 @@ public class UserController {
         this.userService = userService;
     }
 
-    @ApiResponses(value = {
-            @ApiResponse(description = "When user created.", responseCode = "201"),
-            @ApiResponse(description = "When something wrong.", responseCode = "409")
-    })
     @PostMapping
     public ResponseEntity<HttpStatus> createUser(@RequestBody User user)  {
         logger.info("Received request to create user: {}", user.getFirstname());
@@ -53,38 +46,26 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    @ApiResponses(value = {
-            @ApiResponse(description = "User fetched successfully", responseCode = "200"),
-            @ApiResponse(description = "User not found", responseCode = "404")
-    })
     @GetMapping("/{id}")
     public ResponseEntity<User> getUserById(@PathVariable("id") @Parameter(name = "User id") Long userId) {
         logger.info("Received request to fetch user by ID: {}", userId);
-
         Optional<User> user = userService.getUserById(userId);
         if (user.isEmpty()) {
             logger.warn("User with ID {} not found", userId);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-
         logger.info("User with ID {} fetched successfully", userId);
         return new ResponseEntity<>(user.get(), HttpStatus.OK);
     }
 
-    @ApiResponses(value = {
-            @ApiResponse(description = "User updated successfully", responseCode = "200"),
-            @ApiResponse(description = "Conflict during user update", responseCode = "409")
-    })
     @PutMapping
     public ResponseEntity<User> updateUser(@RequestBody User user) {
         logger.info("Received request to update user: {}", user);
-
         Optional<User> userUpdated = userService.updateUser(user);
         if (userUpdated.isEmpty()) {
           logger.error("Failed to update user: {}", user);
           return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
-
         logger.info("User updated successfully: {}", userUpdated.get());
         return new ResponseEntity<>(userUpdated.get(), HttpStatus.OK);
     }
@@ -92,29 +73,22 @@ public class UserController {
     @DeleteMapping("/{id}")
     public ResponseEntity<HttpStatus> deleteUser(@PathVariable("id") @Parameter(name = "User id") Long userId) {
         logger.info("Received request to delete user with ID: {}", userId);
-
         Boolean result = userService.deleteUser(userId);
         if (!result) {
            logger.warn("Failed to delete user with ID: {}", userId);
            return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
-
         logger.info("User with ID {} deleted successfully", userId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @ApiResponses(value = {
-            @ApiResponse(description = "All users fetched successfully", responseCode = "200")
-    })
-    @GetMapping("/all-users")
+    @GetMapping
     public ResponseEntity<List<User>> getUserListPage() {
         logger.info("Received request to fetch all users");
-
         List<User> users = userService.getAllUsers();
         if (users.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-
         logger.info("All users fetched successfully. Total users: {}", users.size());
         return new ResponseEntity<>(users, HttpStatus.OK);
     }

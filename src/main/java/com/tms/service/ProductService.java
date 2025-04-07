@@ -22,32 +22,24 @@ public class ProductService {
         return productRepository.getProductById(id);
     }
 
-    public Optional<Product> createProduct(Product product){
-//        Optional<Long> productId = productRepository.createProduct(product);
-//        if(productId.isPresent()){
-//            return productRepository.getProductById(productId.get());
-//        }
-        return Optional.empty();
+    public Boolean createProduct(Product product){
+        return productRepository.createProduct(product);
     }
 
     public Optional<Product> updateProduct(Product product){
-//        Boolean result = productRepository.updateProduct(product);
-//        if(result){
-//            return getProductById(product.getId());
-//        }
-        return Optional.empty();
+        return productRepository.updateProduct(product);
     }
 
-    public Optional<Product> deleteProduct(Long id){
-//        Boolean result = productRepository.deleteProduct(id);
-//        if(result){
-//            return getProductById(id);
-//        }
-        return Optional.empty();
+    public Boolean deleteProduct(Long id){
+        return productRepository.deleteProduct(id);
     }
 
     public List<Product> getAllProducts(){
         return productRepository.getAllProducts();
+    }
+
+    public Boolean addProductByUser(Long userId, Long productId){
+        return productRepository.addProductByUser(userId, productId);
     }
 
 }

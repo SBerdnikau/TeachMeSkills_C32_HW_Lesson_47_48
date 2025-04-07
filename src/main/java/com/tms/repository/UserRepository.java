@@ -1,14 +1,13 @@
 package com.tms.repository;
 
 import com.tms.model.User;
-import jakarta.persistence.Entity;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,6 +23,7 @@ public class UserRepository {
     }
 
     public Optional<User> getUserById(Long id) {
+        entityManager.clear();
        return Optional.of(entityManager.find(User.class, id));
     }
     
@@ -33,7 +33,7 @@ public class UserRepository {
           entityManager.remove(entityManager.find(User.class, id));
           entityManager.getTransaction().commit();
       }catch(Exception e){
-          logger.error("Deleted is failed -> " + e.getMessage());
+          logger.error("Deleted is failed -> {}", e.getMessage());
           entityManager.getTransaction().rollback();
           return false;
       }
@@ -43,35 +43,44 @@ public class UserRepository {
     public Boolean createUser(User user){
         try {
             entityManager.getTransaction().begin();
-            entityManager.persist(user);//если мы хотим добавлять обьекты, и раньше у нас их не было
+            entityManager.persist(user);
             entityManager.getTransaction().commit();
         }catch(Exception e){
             entityManager.getTransaction().rollback();
-            logger.error("Exception create user -> " + e.getMessage());
+            logger.error("Exception create user -> {}", e.getMessage());
             return false;
         }
         return true;
     }
 
-    public Optional<User> updateUser(User userRequestDto) {
-        User userUpdated = null;
+    public Optional<User> updateUser(User user) {
+        User existingUser  = entityManager.find(User.class, user.getId());
+
+        if (existingUser == null) {
+            throw new EntityNotFoundException("User with id " + user.getId() + " not found");
+        }
+
+        existingUser.setFirstname(user.getFirstname());
+        existingUser.setSecondName(user.getSecondName());
+        existingUser.setAge(user.getAge());
+        existingUser.setSex(user.getSex());
+        existingUser.setTelephoneNumber(user.getTelephoneNumber());
+        existingUser.setEmail(user.getEmail());
+        existingUser.setIsDeleted(user.getIsDeleted());
+
         try {
             entityManager.getTransaction().begin();
-            userUpdated = entityManager.merge(userRequestDto);
+            entityManager.merge(existingUser);
             entityManager.getTransaction().commit();
-        }catch(Exception e){
-            logger.error("Exception update user -> " + e.getMessage());
+        } catch (Exception e) {
             entityManager.getTransaction().rollback();
-            return Optional.empty();
+            logger.error(e.getMessage());
         }
-       return Optional.of(userUpdated);
+        return Optional.of(existingUser);
     }
 
     public List<User> getAllUsers() {
-
-        List<User> users = new ArrayList<>();
-
-        return  users;
+        return entityManager.createQuery("from users").getResultList();
     }
 
 }

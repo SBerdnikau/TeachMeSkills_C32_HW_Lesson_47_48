@@ -3,10 +3,8 @@ package com.tms.repository;
 import com.tms.config.SQLQuery;
 import com.tms.model.Security;
 import com.tms.model.User;
-import com.tms.model.dto.RegistrationRequestDto;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
-import jakarta.persistence.TypedQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,22 +27,24 @@ public class SecurityRepository {
         try {
             entityManager.getTransaction().begin();
             entityManager.persist(user);
-            security.setUserId(user.getId());
             entityManager.persist(security);
             entityManager.getTransaction().commit();
-            return Optional.of(entityManager.find(User.class, user.getId()));
+            return Optional.of(user);
         }catch (Exception e) {
-            logger.error("Registration is failed -> " + e.getMessage());
+            logger.error("Registration is failed -> {}", e.getMessage());
             entityManager.getTransaction().rollback();
             return Optional.empty();
         }
     }
 
     public Boolean isLoginUsed(String login) {
-        //entityManager.createNativeQuery(SQLQuery.GET_SECURITY_BY_LOGIN); // черех простой SQL
-        Query query =  entityManager.createQuery("SELECT s FROM security s WHERE s.login = :login");
-        entityManager.setProperty("login", login);
+        //Query query =  entityManager.createQuery("SELECT s FROM security s WHERE s.login = :login");
+        Query query = entityManager.createNativeQuery(SQLQuery.GET_SECURITY_BY_LOGIN);
+        query.setParameter("login", login);
         return query.getSingleResultOrNull() != null;
     }
 
+    public Optional<Security> getSecurityById(Long id) {
+        return Optional.ofNullable(entityManager.find(Security.class, id));
+    }
 }

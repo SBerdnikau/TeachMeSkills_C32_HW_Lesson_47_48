@@ -1,15 +1,14 @@
 package com.tms.service;
 
+import com.tms.exception.LoginUsedException;
 import com.tms.model.Role;
 import com.tms.model.Security;
 import com.tms.model.User;
 import com.tms.model.dto.RegistrationRequestDto;
 import com.tms.repository.SecurityRepository;
-import com.tms.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.security.auth.login.LoginException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Optional;
@@ -28,10 +27,14 @@ public class SecurityService {
         this.security = security;
     }
 
-    public Optional<User> registration(RegistrationRequestDto registrationRequestDto) throws LoginException {
+    public Optional<Security> getSecurityById(Long id) {
+        return securityRepository.getSecurityById(id);
+    }
+
+    public Optional<User> registration(RegistrationRequestDto registrationRequestDto) throws LoginUsedException {
         try {
             if (securityRepository.isLoginUsed(registrationRequestDto.getLogin())){
-                throw new LoginException(registrationRequestDto.getLogin());
+                throw new LoginUsedException(registrationRequestDto.getLogin());
             }
 
             user.setFirstname(registrationRequestDto.getFirstname());
